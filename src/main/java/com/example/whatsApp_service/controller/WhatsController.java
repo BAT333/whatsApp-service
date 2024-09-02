@@ -1,6 +1,7 @@
 package com.example.whatsApp_service.controller;
 
 import com.example.whatsApp_service.service.WhatService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ public class WhatsController {
 
     @PostMapping("/send")
     @Transactional
+    @Operation(summary ="Send a message via WhatsApp", description = "Request the number and message to be sent and send the message that needs to be sent to specific customers.")
     public ResponseEntity<String> send(@RequestParam String phoneNumber, @RequestParam String message){
         return ResponseEntity.ok(this.service.sendMessage(phoneNumber,message));
     }
