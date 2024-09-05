@@ -20,19 +20,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     @Autowired
     public SecurityFilter filter;
+    @Autowired
+    private GatewayFilter gatewayFilter;
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
-        return security.csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(http -> http.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        authorize->authorize
-                                .requestMatchers(HttpMethod.POST,"/auth").permitAll()
-                                .requestMatchers(HttpMethod.POST,"/auth/register").permitAll()
-                                .requestMatchers("/api/whatsapp","/api/whatsapp/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll().anyRequest().permitAll()
-                )
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+    public SecurityFilterChain filterChain(HttpSecurity security){
+        try {
+            return security.csrf(AbstractHttpConfigurer::disable)
+                    .sessionManagement(https-> https.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                    .authorizeHttpRequests(authoriza->
+                            authoriza.
+                                    requestMatchers("/public/**").permitAll().
+                                    requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll().
+                                    anyRequest().permitAll())
+                    .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                    .addFilterBefore(gatewayFilter, UsernamePasswordAuthenticationFilter.class)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     @Bean
     public AuthenticationManager manager(AuthenticationConfiguration configuration) throws Exception {
