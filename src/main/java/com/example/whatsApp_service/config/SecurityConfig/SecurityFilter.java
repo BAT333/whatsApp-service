@@ -1,12 +1,11 @@
 package com.example.whatsApp_service.config.SecurityConfig;
 
-import com.example.whatsApp_service.config.TokenConfig.TokenService;
-import com.example.whatsApp_service.repository.UserRepository;
+
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -16,19 +15,16 @@ import java.io.IOException;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TokenService tokenService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-       var token=  this.getToken(request);
-       if(token!= null){
-           var obj = tokenService.getUser(token);
-           var user = userRepository.findByLogin(obj);
-           var userAuth = new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
-           SecurityContextHolder.getContext().setAuthentication(userAuth);
-       }
+        String token = this.getToken(request);
+
+        if(token !=null){
+            //UM METODO PARA PASSAR POR AQUI PARA VALIDAR USER
+            var userAuth = new UsernamePasswordAuthenticationToken(null,null,null);
+            SecurityContextHolder.getContext().setAuthentication(userAuth);
+        }
         filterChain.doFilter(request,response);
     }
 
