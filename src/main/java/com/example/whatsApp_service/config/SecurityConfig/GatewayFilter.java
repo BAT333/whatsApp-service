@@ -11,17 +11,16 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
-
 public class GatewayFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_URIS = List.of("/public");
     private static final String TRUSTED_PROXY_IP = "172.27.64.1";
-
+    private static final String TRUSTED_ORIGIN = "http://172.27.64.1:8082";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-        if (isPublicUri(requestURI) ||isTrustedForwardedHeader(request)) {
+        if (isPublicUri(requestURI) ||isTrustedForwardedHeader(request)||isTrustedOrigin(request)) {
             filterChain.doFilter(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
@@ -37,5 +36,16 @@ public class GatewayFilter extends OncePerRequestFilter {
         }
         return false;
     }
-    }
+    private boolean isTrustedOrigin(HttpServletRequest request) {
 
+        String originHeader = request.getHeader("Origin");
+        String refererHeader = request.getHeader("Referer");
+
+        //Display information in the log (for debugging)
+        System.out.println("Origin: " + (originHeader != null ? originHeader : "N/A"));
+        System.out.println("Referer: " + (refererHeader != null ? refererHeader : "N/A"));
+
+
+        return TRUSTED_ORIGIN.equals(originHeader) || (refererHeader != null && refererHeader.startsWith(TRUSTED_ORIGIN));
+    }
+}
