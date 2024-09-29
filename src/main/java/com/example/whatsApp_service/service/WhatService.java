@@ -3,6 +3,7 @@ package com.example.whatsApp_service.service;
 
 import com.example.whatsApp_service.model.DataTextDTO;
 import com.example.whatsApp_service.model.WhatsAppMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 
 @Service
+@Slf4j
 public class WhatService {
 
     @Value("${whatsapp.api.url}")
@@ -23,6 +25,7 @@ public class WhatService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String sendMessage(String phoneNumber, String messageText) {
+        log.info("Sending a message on WhatsApp");
         var request = this.create(phoneNumber,messageText);
         return restTemplate.postForObject(whatsappApiUrl, request, String.class);
     }
@@ -39,7 +42,7 @@ public class WhatService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(accessToken);
 
-       return new HttpEntity<>(message, headers);
+        return new HttpEntity<>(message, headers);
     }
 }
 

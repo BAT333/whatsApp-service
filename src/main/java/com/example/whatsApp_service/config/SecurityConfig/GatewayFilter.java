@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
+@Slf4j
 public class GatewayFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_URIS = List.of("/public");
     private static final String TRUSTED_PROXY_IP = "172.27.64.1";
@@ -18,7 +20,7 @@ public class GatewayFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
+        log.info("request validation");
         String requestURI = request.getRequestURI();
         if (isPublicUri(requestURI) ||isTrustedForwardedHeader(request)||isTrustedOrigin(request)) {
             filterChain.doFilter(request, response);
@@ -42,8 +44,8 @@ public class GatewayFilter extends OncePerRequestFilter {
         String refererHeader = request.getHeader("Referer");
 
         //Display information in the log (for debugging)
-        System.out.println("Origin: " + (originHeader != null ? originHeader : "N/A"));
-        System.out.println("Referer: " + (refererHeader != null ? refererHeader : "N/A"));
+        log.info("Origin: " + (originHeader != null ? originHeader : "N/A"));
+        log.info("Referer: " + (refererHeader != null ? refererHeader : "N/A"));
 
 
         return TRUSTED_ORIGIN.equals(originHeader) || (refererHeader != null && refererHeader.startsWith(TRUSTED_ORIGIN));
